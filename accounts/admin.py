@@ -130,4 +130,3 @@ class PaymentAdmin(admin.ModelAdmin):
 admin.site.register(Category)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(Purchase, PurchaseAdmin)
-# admin.site.register(Payment, PaymentAdmin)
