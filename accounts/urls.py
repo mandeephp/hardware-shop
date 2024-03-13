@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import get_materials  # Import the get_materials view
+from .views import generate_pdf  # Import the get_materials view
 
 urlpatterns = [
     # Other URL patterns
-    path('get_materials/', get_materials, name='get_materials'),  # Define the URL pattern for get_materials
+    path('generate-pdf/<int:purchase_id>/', generate_pdf, name='generate_pdf'),
 ]

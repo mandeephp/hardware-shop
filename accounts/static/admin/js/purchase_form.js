@@ -1,33 +1,37 @@
 (function($) {
-    $(document).ready(function() {
-        function updateMaterialOptions() {
-            var categoryId = $('#id_category').val();
-            var materialField = $('#id_material');
-            var url = '/get_materials/?category_id=' + categoryId; // URL to fetch related materials
-            var selectedMaterial = materialField.val(); // Store the currently selected material ID
+    function toggleOtherPaymentTextField(row) {
+        // Find the payment_type select within this row
+        var $paymentTypeSelect = $(row).find('.field-payment_type select');
+        // Find the other_payment_text div within this row
+        var $otherPaymentText = $(row).find('.field-other_payment_text');
 
-            // Fetch related materials using AJAX
-            $.getJSON(url, function(data) {
-                materialField.empty(); // Clear existing options
-                var materialExists = false; // Flag to check if the previously selected material exists in the new list
-                $.each(data.materials, function(key, value) {
-                    materialField.append($('<option></option>').attr('value', key).text(value));
-                    if (key == selectedMaterial) {
-                        materialExists = true; // The previously selected material exists in the new list
-                    }
-                });
-
-                if (materialExists) {
-                    materialField.val(selectedMaterial); // Re-select the previously selected material if it exists
-                }
-            });
+        // Show or hide the other_payment_text based on payment_type value or if text is present
+        if ($paymentTypeSelect.val() === 'other' || $otherPaymentText.find('textarea, input').val().trim() !== '') {
+            $otherPaymentText.show();
+        } else {
+            $otherPaymentText.hide();
         }
+    }
 
-        $('#id_category').change(function() {
-            updateMaterialOptions();
+    // When the DOM is ready, set up the initial state and event handlers
+    $(document).ready(function() {
+        // Set up initial state for each existing row
+        $('.inline-related .form-row').each(function() {
+            toggleOtherPaymentTextField(this);
         });
 
-        // Trigger initial update when the page loads
-        updateMaterialOptions();
+        // Event handler for when payment_type changes
+        $('.inline-related').on('change', '.field-payment_type select', function() {
+            toggleOtherPaymentTextField($(this).closest('.form-row'));
+        });
+
+        // Event handler for when a new form is added
+        $(document).on('formset:added', function(event, $row, formsetName) {
+            toggleOtherPaymentTextField($row);
+            // Re-bind the change event to the new row
+            $row.find('.field-payment_type select').change(function() {
+                toggleOtherPaymentTextField($(this).closest('.form-row'));
+            });
+        });
     });
 })(django.jQuery);

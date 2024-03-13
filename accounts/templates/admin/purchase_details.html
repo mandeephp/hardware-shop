@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tax Invoice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            margin-top: 20px;
+        }
+        .invoice-details {
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .total-row td {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="company-details">
+            <h2>Company Name</h2>
+            <p>Address: Company Address</p>
+            <p>Phone: +123456789</p>
+        </div>
+        <div class="buyer-details">
+            <h2>Buyer Details</h2>
+            <p><strong>Buyer Name:</strong> {{ purchase.buyer_name }}</p>
+            <p><strong>Address:</strong> {{ purchase.address }}</p>
+            <p><strong>Phone Number:</strong> {{ purchase.phone_number }}</p>
+        </div>
+        <div class="invoice-details">
+            <h2>Invoice Details</h2>
+            <table >
+                {% for  bill_detail in bill_details %}
+                <tr>
+                    <td><strong>Invoice No.</strong><br>{{ bill_detail.invoice_number }}</td>
+                    <td><strong>Purchase Date</strong><br>{{ bill_detail.purchase.purchase_date }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Payment Mode</strong><br>{{ bill_detail.payment_mode }}</td>
+                    <td><strong>Dispatch Through</strong><br>{{ bill_detail.dispatch_through }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Destination</strong><br>{{ bill_detail.destination }}</td>
+                    <td><strong>Vehicle Number</strong><br>{{ bill_detail.vehicle_number }}</td>
+                </tr>
+                <tr>
+                    <td colspan="2"><strong>Transportation</strong><br>{{ bill_detail.transportation }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th colspan="2">Description of Goods</th>
+                    <th>Quantity</th>
+                    <th>Rate</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="2">{{ purchase.material.product_name }}</td>
+                    <td>{{ purchase.quantity }}</td>
+                    <td>{{ purchase.material.price }}</td>
+                    <td>{{ purchase.total_amount }}</td>
+                </tr>
+                <tr class="total-row">
+                    <td colspan="4"><b>TOTAL AMOUNT</b></td>
+                    <td>{{ purchase.total_amount }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

@@ -1,10 +1,7 @@
 from django.db import models
-from datetime import date
-from django.db.models import Sum, F, Value as V, ExpressionWrapper, Case, When
+from django.db.models import Sum, F, Value as V, Case, When
 from django.db.models.functions import Coalesce
-from django.contrib.auth.models import Permission
-
-# Create your models here.
+from phonenumber_field.modelfields import PhoneNumberField
 
 
 class Category(models.Model):
@@ -13,42 +10,43 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
-class Product(models.Model):
-    product_category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    product_name = models.CharField(max_length=200)
-    price = models.IntegerField(null=True, blank=True)
-    
-    def __str__(self):
-        return f"{self.product_name} - {self.product_category}"
     
 class Purchase(models.Model):
+    PAYMENT_CHOICES = [
+        ('credit_card', 'Credit Card'),
+        ('upi', 'UPI'),
+        ('cash', 'Cash'),
+        ('other', 'Other'),
+    ]
     buyer_name = models.CharField(max_length=200)
     address = models.CharField(max_length=200, null=True, blank=True)
+    phone_number = PhoneNumberField(region='IN', null=True, blank=True, unique=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
-    material = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True)
-    quantity = models.IntegerField()
     purchase_date = models.DateField(auto_now_add=True)
     total_purchased_amount = models.IntegerField(null=True, blank=True)
+    purchase_slip = models.ImageField(upload_to='purchase_slips/', null=True, blank=True)
 
-    def save(self, *args, **kwargs):
-        if self.material and self.quantity:
-            self.total_purchased_amount = self.material.price * self.quantity
-            self.category = self.material.product_category
-        super().save(*args, **kwargs)
-    
     def __str__(self):
         return f"{self.buyer_name} - {self.category} - {self.total_purchased_amount}"
 
-    
+
 class Payment(models.Model):
+    PAYMENT_CHOICES = [
+        ('credit_card', 'Credit Card'),
+        ('upi', 'UPI'),
+        ('cash', 'Cash'),
+        ('cheque', 'Cash'),
+        ('other', 'Other'),
+    ]
     purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE)
     amount_paid = models.IntegerField(null=True, blank=True)
-    balance_amount = models.IntegerField( null=True, blank=True)
+    balance_amount = models.IntegerField(null=True, blank=True)
     new_payment = models.IntegerField(null=True, blank=True)
     balance_paid_date = models.DateField(auto_now=True)
+    payment_type = models.CharField(max_length=20, choices=PAYMENT_CHOICES, null=True, blank=True)
+    other_payment_text = models.TextField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        # Calculate the total amount paid including initial payment and new payments
         total_paid = self.purchase.payment_set.aggregate(
             total_paid=Coalesce(Sum(
                 Case(
@@ -61,14 +59,14 @@ class Payment(models.Model):
         # If there's an initial payment, add it to total_paid
         if self.amount_paid is not None:
             total_paid += self.amount_paid
-        
+
         # If it's a new payment, add it to the previous total_paid
         if self.new_payment is not None:
             total_paid += self.new_payment
 
         # Update the amount_paid field with the new total paid amount
         self.amount_paid = total_paid
-        
+
         # Recalculate the balance_amount
         if self.purchase.total_purchased_amount is not None:
             self.balance_amount = self.purchase.total_purchased_amount - total_paid
@@ -77,13 +75,24 @@ class Payment(models.Model):
 
         # Save the updated fields
         super().save(*args, **kwargs)
-        
 
     def __str__(self):
         return f"{self.purchase.buyer_name} - {self.new_payment}"
-    
 
     
+
+class Bill(models.Model):
+
+    purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE)
+    invoice_number = models.CharField(max_length=20, unique=True,null=True, blank=True)
+    payment_mode = models.CharField(max_length=200,null=True, blank=True)
+    dispatch_through = models.CharField(max_length=200,null=True, blank=True)
+    destination = models.CharField(max_length=200,null=True, blank=True)
+    vehicle_number = models.CharField(max_length=200,null=True, blank=True)
+    transportation  = models.CharField(max_length=200,null=True, blank=True)
+    
+    def __str__(self):
+        return f"{self.purchase.buyer_name}-{self.destination}"
     
     
     
