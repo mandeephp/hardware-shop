@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',
+    'phonenumber_field',
+
 ]
 
 MIDDLEWARE = [
@@ -125,3 +127,33 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+#smtp
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'email'
+EMAIL_HOST_PASSWORD = 'email password'
+
+
+#celery
+
+# Celery Configuration Options
+CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Adjust if your Redis URL is different
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
+
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'send_reminder_emails_test': {
+        'task': 'accounts.tasks.send_reminder_emails',
+        'schedule': crontab(hour=8, minute=0, day_of_week='monday'),  # Runs every Monday at 8:00 AM
+    },
+}
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
