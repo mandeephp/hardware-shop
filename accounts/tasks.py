@@ -15,7 +15,7 @@ def send_reminder_emails():
 
     reminder_threshold = now() -  timedelta(days=30)
 
-    # Subquery to get the latest payment for each purchase
+    # Subquery to get the latest payment for each buyer
     latest_payments_subquery = Subquery(
         Payment.objects.filter(
             purchase=OuterRef('pk')
@@ -23,7 +23,7 @@ def send_reminder_emails():
         .values('balance_paid_date')[:1]
     )
 
-    # Subquery to get the latest balance amount for each purchase
+    # Subquery to get the latest balance amount for each buyer
     latest_balance_subquery = Subquery(
         Payment.objects.filter(
             purchase=OuterRef('pk')
@@ -40,7 +40,7 @@ def send_reminder_emails():
     )
 
     for purchase in purchases:
-        # Construct the email line for this purchase
+        # Construct the email line for this buyer
         last_payment_date = purchase.latest_payment_date.strftime('%Y-%m-%d') if purchase.latest_payment_date else "N/A"
         amount_paid = purchase.total_purchased_amount - purchase.latest_balance_amount
         balance_amount = purchase.latest_balance_amount

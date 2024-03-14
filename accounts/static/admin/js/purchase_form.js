@@ -1,37 +1,29 @@
-(function($) {
-    function toggleOtherPaymentTextField(row) {
-        // Find the payment_type select within this row
-        var $paymentTypeSelect = $(row).find('.field-payment_type select');
-        // Find the other_payment_text div within this row
-        var $otherPaymentText = $(row).find('.field-other_payment_text');
+document.addEventListener('DOMContentLoaded', function() {
+  const dateFilter = document.getElementById('purchase_date_filter'); // Adjust the ID to match your date input element
 
-        // Show or hide the other_payment_text based on payment_type value or if text is present
-        if ($paymentTypeSelect.val() === 'other' || $otherPaymentText.find('textarea, input').val().trim() !== '') {
-            $otherPaymentText.show();
-        } else {
-            $otherPaymentText.hide();
-        }
-    }
+  // Check if the dateFilter element exists to avoid errors
+  if (!dateFilter) {
+    return;
+  }
 
-    // When the DOM is ready, set up the initial state and event handlers
-    $(document).ready(function() {
-        // Set up initial state for each existing row
-        $('.inline-related .form-row').each(function() {
-            toggleOtherPaymentTextField(this);
-        });
+  dateFilter.addEventListener('change', function() {
+    const selectedDate = this.value;
 
-        // Event handler for when payment_type changes
-        $('.inline-related').on('change', '.field-payment_type select', function() {
-            toggleOtherPaymentTextField($(this).closest('.form-row'));
-        });
+    // This selector targets the specific inline divs
+    const purchaseSections = document.querySelectorAll('.djn-item.djn-module.djn-inline-form.has_original.inline-related.dynamic-form.grp-dynamic-form.djn-dynamic-form-accounts-purchase');
 
-        // Event handler for when a new form is added
-        $(document).on('formset:added', function(event, $row, formsetName) {
-            toggleOtherPaymentTextField($row);
-            // Re-bind the change event to the new row
-            $row.find('.field-payment_type select').change(function() {
-                toggleOtherPaymentTextField($(this).closest('.form-row'));
-            });
-        });
+    purchaseSections.forEach(function(section) {
+      // Retrieve the purchase date from the corresponding input field
+      const purchaseDateInput = section.querySelector('input[name*="purchase_date"]');
+      const purchaseDate = purchaseDateInput ? purchaseDateInput.value : null;
+
+      if (purchaseDate === selectedDate) {
+        section.classList.add('highlight');
+        section.style.display = 'block'; // Ensure the section is visible
+      } else {
+        section.classList.remove('highlight');
+        section.style.display = 'none'; // Hide the section
+      }
     });
-})(django.jQuery);
+  });
+});
