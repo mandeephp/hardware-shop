@@ -25,6 +25,7 @@ class Purchase(models.Model):
     buyer_name = models.ForeignKey(Buyer, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
     purchase_date = models.DateField(blank=True, null=True)
+    purchase_time = models.TimeField(blank=True, null=True)
     total_purchased_amount = models.IntegerField(null=True, blank=True)
     purchase_slip = models.ImageField(upload_to='purchase_slips/', null=True, blank=True)
 

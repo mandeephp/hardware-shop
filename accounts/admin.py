@@ -74,7 +74,7 @@ class PurchaseInline(nested_admin.NestedStackedInline):
     model = Purchase
     extra = 0  # Number of extra forms to display
     inlines = [PaymentInline]  # Nest PaymentInline within PurchaseInline
-    fields = ('buyer_name', 'category', 'purchase_slip', 'purchase_date', 'total_purchased_amount',)
+    fields = ('buyer_name', 'category', 'purchase_slip', 'purchase_date','purchase_time', 'total_purchased_amount',)
 
     formfield_overrides = {
         models.ImageField: {'widget': CustomAdminFileWidget},
@@ -140,7 +140,7 @@ class CustomPhoneNumberWidget(PhoneNumberInternationalFallbackWidget):
 class PurchaseForm(forms.ModelForm):
     class Meta:
         model = Purchase
-        fields = ('buyer_name', 'category', 'purchase_slip', 'purchase_date','total_purchased_amount',)
+        fields = ('buyer_name', 'category', 'purchase_slip', 'purchase_date','purchase_time','total_purchased_amount',)
 
 
 class CategoryFilter(SimpleListFilter):
