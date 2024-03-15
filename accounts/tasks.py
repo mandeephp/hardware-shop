@@ -44,7 +44,9 @@ def send_reminder_emails():
         last_payment_date = purchase.latest_payment_date.strftime('%Y-%m-%d') if purchase.latest_payment_date else "N/A"
         amount_paid = purchase.total_purchased_amount - purchase.latest_balance_amount
         balance_amount = purchase.latest_balance_amount
-
+        buyer_name = purchase.buyer_name.name
+        buyer_address = purchase.buyer_name.address
+        buyer_phone = purchase.buyer_name.phone_number
         email_body_lines.append(
             format_html(
                 "<p><strong>Buyer Name:</strong> {}<br>"
@@ -55,7 +57,7 @@ def send_reminder_emails():
                 "<strong>Total Amount:</strong> {}<br>"
                 "<strong>Total Amount Paid:</strong> {}<br>"
                 "<strong>Remaining Amount:</strong> {}</p>",
-                purchase.buyer_name, purchase.address, purchase.phone_number, purchase.category,
+                buyer_name, buyer_address, buyer_phone, purchase.category,
                 last_payment_date, purchase.total_purchased_amount, amount_paid, balance_amount
             )
         )
@@ -63,7 +65,7 @@ def send_reminder_emails():
     if email_body_lines:
         message = (
                 "<html><body>"
-                "<p>Hello, here is the list of customers who have not made a payment for more than 28 days:</p>"
+                "<p>Hello, here is the list of customers who have not made a payment for more than 30 days:</p>"
                 + "\n".join(email_body_lines) +
                 "</body></html>"
         )

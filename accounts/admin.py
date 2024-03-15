@@ -223,24 +223,26 @@ class PurchaseAdmin(admin.ModelAdmin):
 
     def send_email(self, request, queryset):
         subject = 'Alert Purchase Remaining Balance'
-        from_email = 'email'
-        recipient_list = ['send to email']
+        from_email = 'setting email'
+        recipient_list = ['user send email']
         email_body_lines = []
-
         for purchase in queryset:
-            payments = purchase.payment_set.order_by('-payment_date', '-pk')  # Order by date and then by primary key
+            payments = purchase.payment_set.order_by('-balance_paid_date', '-pk')
             last_payment = payments.first()
 
             if last_payment:
-                last_payment_date = last_payment.payment_date.strftime('%Y-%m-%d')
+                last_payment_date = last_payment.balance_paid_date.strftime('%Y-%m-%d')
                 amount_paid = last_payment.amount_paid
                 balance_amount = last_payment.balance_amount
-                payment_received = last_payment.payment_received
             else:
                 last_payment_date = "No payments made"
                 amount_paid = "N/A"
                 balance_amount = "N/A"
-                payment_received = "N/A"
+
+            # Get the buyer's details from the related Buyer object
+            buyer_name = purchase.buyer_name.name
+            buyer_address = purchase.buyer_name.address
+            buyer_phone = purchase.buyer_name.phone_number
 
             email_body_lines.append(
                 format_html(
@@ -251,13 +253,11 @@ class PurchaseAdmin(admin.ModelAdmin):
                     "<strong>Last Payment Date:</strong> {}<br>"
                     "<strong>Total Amount:</strong> {}<br>"
                     "<strong>Total Amount Paid:</strong> {}<br>"
-                    "<strong>Remaining Amount:</strong> {}<br>"
-                    "<strong>Last Payment Received:</strong> {}</p>",
-                    purchase.buyer_name, purchase.address, purchase.phone_number, purchase.category, last_payment_date,
-                    purchase.total_purchased_amount, amount_paid, balance_amount, payment_received
+                    "<strong>Remaining Amount:</strong> {}<br>",
+                    buyer_name, buyer_address, buyer_phone, purchase.category, last_payment_date,
+                    purchase.total_purchased_amount, amount_paid, balance_amount,
                 )
             )
-
         message = (
                 "<html><body>"
                 "<p>Hello, here is the list of customer who did not paid from last 30 days:</p>"
