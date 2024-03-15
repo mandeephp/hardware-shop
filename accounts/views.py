@@ -9,7 +9,7 @@ def generate_pdf(request, purchase_id):
     bill_detail = Bill.objects.filter(purchase__buyer_name=buyer_name)
     template_path = 'admin/purchase_details.html'
     context = {
-        'purchase': purchase,
+        'buyer': purchase,
         'bill_details': bill_detail
         }
     # Create a Django template object, load the template file and render it with context
